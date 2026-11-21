@@ -3,4 +3,8 @@ __pycache__/
 .venv/
 *.pyc
 netviz.db
+*.sqlite
+*.sqlite3
+.env
+.vercel/
 instance/

@@ -142,6 +142,42 @@ python app.py
 
 Open <http://127.0.0.1:5000>.
 
+## Deploy on Vercel
+
+NetViz includes Vercel's current FastAPI framework configuration plus a compatibility ASGI entrypoint:
+
+```text
+vercel.json
+api/index.py
+.vercelignore
+.python-version
+```
+
+Create a stable session secret:
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Add it to the Vercel project as `NETVIZ_SECRET_KEY`, then deploy from this directory:
+
+```bash
+npm install -g vercel
+vercel login
+vercel
+vercel --prod
+```
+
+For the full dashboard, Git integration, local `vercel dev`, verification endpoints, and persistence guidance, read [VERCEL_DEPLOYMENT.md](VERCEL_DEPLOYMENT.md).
+
+### Vercel persistence limitation
+
+Vercel's deployment filesystem is read-only and its writable `/tmp` directory is ephemeral and isolated per function instance. NetViz automatically uses `/tmp/netviz.db`, rehydrates a signed session identity after cold starts, and keeps all graphical simulations operational. However, accounts, saved topologies, DHCP leases, scores, and challenge records are **not guaranteed to persist** across cold starts or instances.
+
+Use a managed database before treating a Vercel deployment as a durable multi-user classroom service. The deployed interface marks this state as **Vercel demo · ephemeral saves**.
+
+DNS lookups on Vercel use the resolver configured inside the Vercel Function runtime, not the website visitor's computer resolver.
+
 ### Environment variables
 
 ```bash
@@ -160,6 +196,13 @@ NetViz/
 ├── app.py
 ├── quiz_bank.py
 ├── requirements.txt
+├── requirements-dev.txt
+├── vercel.json
+├── VERCEL_DEPLOYMENT.md
+├── .python-version
+├── .vercelignore
+├── api/
+│   └── index.py
 ├── MEDIA_SOURCES.md
 ├── templates/
 │   └── index.html
@@ -179,6 +222,7 @@ NetViz/
 ## Validate
 
 ```bash
+pip install -r requirements-dev.txt
 pytest -q
 python -m py_compile app.py quiz_bank.py
 node --check static/js/app.js

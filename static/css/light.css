@@ -29,3 +29,6 @@ dialog{background:#fff;color:#263550;border-color:#cfdbea}.dialog-head{border-co
 /* Local system typography: no external font dependency */
 body,button,input,select,textarea{font-family:"Segoe UI Variable Text","Segoe UI",Arial,sans-serif}.hero-card h1,.split-heading h1,.section-heading h3,.mission-card h3,.media-demo-title h2,.media-details h2,.brand,.profile-xp h2,.mission-workspace h2{font-family:"Segoe UI Variable Display","Segoe UI",Arial,sans-serif!important;letter-spacing:-.025em}
 @media(max-width:650px){.infrared-lab{min-width:0;width:96%;grid-template-columns:58px minmax(120px,1fr) 58px}.ir-emitter,.ir-receiver{width:56px;height:56px}}
+
+/* Vercel deployment disclosure */
+.simulation-badge.serverless-badge{background:#fff7df;border-color:#eed38a;color:#805f16}.simulation-badge.serverless-badge i{background:#f1a91f;box-shadow:0 0 10px rgba(241,169,31,.45)}

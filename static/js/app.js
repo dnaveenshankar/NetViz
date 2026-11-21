@@ -413,5 +413,17 @@ function escapeHtml(value){const d=document.createElement("div");d.textContent=S
 function escapeAttr(value){return escapeHtml(value).replaceAll('"','&quot;')}
 function capitalize(v){return v.charAt(0).toUpperCase()+v.slice(1)}
 
+async function initDeploymentStatus(){
+  try{
+    const info=await api("/api/deployment");
+    if(info.serverless){
+      const badge=$(".simulation-badge");
+      badge.classList.add("serverless-badge");
+      badge.innerHTML="<i></i> Vercel demo · ephemeral saves";
+      badge.title=info.message;
+    }
+  }catch(_){/* The lab remains usable if deployment metadata is unavailable. */}
+}
+
 // Boot
-initPalette(); renderTopology(); renderInspector(); initMobileDrag(); renderMedia("CAT5"); initAuth(); calculateSubnet();
+initPalette(); renderTopology(); renderInspector(); initMobileDrag(); renderMedia("CAT5"); initAuth(); initDeploymentStatus(); calculateSubnet();

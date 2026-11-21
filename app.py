@@ -23,14 +23,19 @@ from starlette.templating import Jinja2Templates
 from quiz_bank import MODULES, QUESTION_BANK
 
 BASE_DIR = Path(__file__).resolve().parent
-DATABASE = Path(os.environ.get("NETVIZ_DATABASE", BASE_DIR / "netviz.db"))
+SERVERLESS = os.environ.get("NETVIZ_SERVERLESS") == "1" or bool(os.environ.get("VERCEL"))
+DEFAULT_DATABASE = Path("/tmp/netviz.db") if SERVERLESS else BASE_DIR / "netviz.db"
+DATABASE = Path(os.environ.get("NETVIZ_DATABASE", DEFAULT_DATABASE))
+SESSION_SECRET_CONFIGURED = bool(os.environ.get("NETVIZ_SECRET_KEY"))
+HTTPS_ONLY_SETTING = os.environ.get("NETVIZ_HTTPS_ONLY")
+SESSION_HTTPS_ONLY = SERVERLESS if HTTPS_ONLY_SETTING is None else HTTPS_ONLY_SETTING == "1"
 
 app = FastAPI(title="NetViz Advanced Network Engineering Lab", version="3.0.0")
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.environ.get("NETVIZ_SECRET_KEY", secrets.token_hex(32)),
     same_site="lax",
-    https_only=os.environ.get("NETVIZ_HTTPS_ONLY") == "1",
+    https_only=SESSION_HTTPS_ONLY,
 )
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 templates = Jinja2Templates(directory=BASE_DIR / "templates")
@@ -41,7 +46,7 @@ def now_iso() -> str:
 
 
 def db() -> sqlite3.Connection:
-    connection = sqlite3.connect(DATABASE)
+    connection = sqlite3.connect(DATABASE, timeout=15)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     return connection
@@ -105,10 +110,38 @@ init_db()
 
 
 def require_user(request: Request) -> int:
-    user_id = request.session.get("user_id")
-    if not user_id:
+    user_id = ensure_session_user(request)
+    if user_id is None:
         raise HTTPException(status_code=401, detail="Authentication required")
-    return int(user_id)
+    return user_id
+
+
+def ensure_session_user(request: Request) -> int | None:
+    """Resolve the signed session to a user in the active SQLite instance.
+
+    Vercel's ``/tmp`` filesystem is isolated and ephemeral. A warm instance can
+    retain its local database, but a later request may reach a fresh instance.
+    Rehydrating the signed session identity prevents authenticated demo actions
+    from failing with foreign-key errors after a cold start. Durable saved data
+    still requires a persistent database outside Vercel's filesystem.
+    """
+    username = request.session.get("username")
+    if not username:
+        return None
+    with db() as connection:
+        user = connection.execute("SELECT id FROM users WHERE username=?", (username,)).fetchone()
+        if user:
+            user_id = int(user["id"])
+        elif SERVERLESS:
+            cursor = connection.execute(
+                "INSERT INTO users(username,password_hash,created_at) VALUES(?,?,?)",
+                (username, hash_password(secrets.token_urlsafe(24)), now_iso()),
+            )
+            user_id = int(cursor.lastrowid)
+        else:
+            return None
+    request.session["user_id"] = user_id
+    return user_id
 
 
 async def body(request: Request) -> dict:
@@ -151,7 +184,26 @@ async def index(request: Request):
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "service": "NetViz", "time": now_iso()}
+    return {
+        "status": "ok", "service": "NetViz", "version": app.version,
+        "time": now_iso(), "runtime": "vercel-serverless" if SERVERLESS else "local",
+    }
+
+
+@app.get("/api/deployment")
+async def deployment_info():
+    return {
+        "platform": "vercel" if SERVERLESS else "local",
+        "serverless": SERVERLESS,
+        "database_path": str(DATABASE),
+        "persistence": "ephemeral" if SERVERLESS else "persistent-local",
+        "session_secret_configured": SESSION_SECRET_CONFIGURED,
+        "message": (
+            "Vercel uses isolated ephemeral /tmp storage. Simulations work, but accounts, saved topologies, "
+            "leases, scores, and challenge records are not guaranteed to persist across cold starts."
+            if SERVERLESS else "SQLite data persists at the configured local path."
+        ),
+    }
 
 
 @app.post("/api/register")
@@ -213,9 +265,10 @@ async def logout(request: Request):
 
 @app.get("/api/me")
 async def me(request: Request):
-    if "user_id" not in request.session:
+    user_id = ensure_session_user(request)
+    if user_id is None:
         return {"user": None}
-    return {"user": {"id": request.session["user_id"], "username": request.session["username"], "guest": bool(request.session.get("guest"))}}
+    return {"user": {"id": user_id, "username": request.session["username"], "guest": bool(request.session.get("guest"))}}
 
 
 @app.get("/api/topologies")

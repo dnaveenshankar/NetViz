@@ -1,4 +1,5 @@
 import importlib
+import json
 import os
 import sys
 from pathlib import Path
@@ -29,7 +30,12 @@ def register(client):
 
 
 def test_health_and_home(client):
-    assert client.get("/api/health").status_code == 200
+    health = client.get("/api/health")
+    assert health.status_code == 200
+    assert health.json()["version"] == "3.0.0"
+    deployment = client.get("/api/deployment")
+    assert deployment.status_code == 200
+    assert deployment.json()["serverless"] is False
     home = client.get("/")
     assert home.status_code == 200
     assert b"Advanced Network Engineering Lab" in home.content
@@ -37,6 +43,13 @@ def test_health_and_home(client):
     assert b'id="missions"' in home.content
     assert b'id="mediaSections"' in home.content
     assert b'id="receiverDecap"' in home.content
+
+
+def test_vercel_configuration_files():
+    config = json.loads((PROJECT_ROOT / "vercel.json").read_text())
+    assert config["framework"] == "fastapi"
+    assert (PROJECT_ROOT / "api" / "index.py").exists()
+    assert (PROJECT_ROOT / ".vercelignore").exists()
 
 
 def test_registration_topology_and_history(client):
