@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NetViz Advanced Network Engineering Lab">
+  <title>NetViz · Advanced Network Engineering Lab</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23081322'/%3E%3Ccircle cx='32' cy='13' r='6' fill='%2329dcff'/%3E%3Ccircle cx='13' cy='48' r='6' fill='%23ff5fd2'/%3E%3Ccircle cx='51' cy='48' r='6' fill='%23ffd45b'/%3E%3Cpath d='M29 18 17 42m18-24 12 24M19 48h26' stroke='%238b6cff' stroke-width='4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/styles.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/upgrade.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', path='css/light.css') }}">
+</head>
+<body>
+  <div id="authOverlay" class="auth-overlay">
+    <section class="auth-card glass">
+      <div class="brand brand-large"><span class="brand-mark"><i></i><i></i><i></i></span><span>NetViz</span></div>
+      <p class="eyebrow">ADVANCED NETWORK ENGINEERING LAB</p>
+      <h1>See the network think.</h1>
+      <p class="muted">Build topologies, animate protocols, and inspect every forwarding decision in a safe educational simulator.</p>
+      <form id="authForm">
+        <label>Username<input id="authUsername" required minlength="3" maxlength="32" autocomplete="username" placeholder="network_student"></label>
+        <label>Password<input id="authPassword" required minlength="8" type="password" autocomplete="current-password" placeholder="At least 8 characters"></label>
+        <button class="primary wide" type="submit" id="loginBtn">Sign in</button>
+        <button class="ghost wide" type="button" id="registerBtn">Create local account</button>
+        <button class="guest-login wide" type="button" id="guestBtn"><span>Explore instantly</span><b>Continue as guest →</b></button>
+        <p id="authMessage" class="form-message" aria-live="polite"></p>
+      </form>
+      <small>Accounts, saved labs, leases, and scores are stored locally in SQLite.</small>
+    </section>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark"><i></i><i></i><i></i></span><span>NetViz</span></div>
+      <nav id="mainNav" aria-label="Lab modules">
+        <button class="nav-item active" data-view="dashboard"><span class="nav-icon">⌂</span><span>Overview</span></button>
+        <button class="nav-item" data-view="topology"><span class="nav-icon">◇</span><span>Network Lab</span></button>
+        <button class="nav-item" data-view="mobile"><span class="nav-icon">◉</span><span>Mobile Calls</span></button>
+        <button class="nav-item" data-view="messaging"><span class="nav-icon">↗</span><span>Messaging</span></button>
+        <button class="nav-item" data-view="transport"><span class="nav-icon">⇄</span><span>TCP & UDP</span></button>
+        <button class="nav-item" data-view="subnet"><span class="nav-icon">#</span><span>IP & Subnet</span></button>
+        <button class="nav-item" data-view="dhcp"><span class="nav-icon">D</span><span>DHCP</span></button>
+        <button class="nav-item" data-view="dns"><span class="nav-icon">◎</span><span>DNS</span></button>
+        <button class="nav-item" data-view="media"><span class="nav-icon">≈</span><span>Media Lab</span></button>
+        <button class="nav-item" data-view="quiz"><span class="nav-icon">✓</span><span>Quiz Centre</span></button>
+        <button class="nav-item" data-view="missions"><span class="nav-icon">★</span><span>Challenge Lab</span></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="status-dot"><i></i><span>Simulation engine ready</span></div>
+        <button id="logoutBtn" class="user-chip"><span id="userInitial">N</span><span id="usernameLabel">Student</span><b>↪</b></button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div><p class="eyebrow" id="viewEyebrow">LEARNING WORKSPACE</p><h2 id="viewTitle">Lab Overview</h2></div>
+        <div class="top-actions"><span class="simulation-badge"><i></i> Educational simulation</span><button id="helpBtn" class="icon-btn" title="Lab guide">?</button></div>
+      </header>
+
+      <div id="toastRegion" aria-live="polite"></div>
+
+      <section id="dashboard" class="view active">
+        <div class="hero-card">
+          <div><p class="eyebrow">INTERACTIVE · VISUAL · EXPLAINABLE</p><h1>Build it. Send it.<br><em>Understand it.</em></h1><p>NetViz turns complex network behavior into visible, animated decisions—from Ethernet learning to inter-VLAN routing and application delivery.</p><button class="primary" data-open-view="topology">Open network workspace <span>→</span></button></div>
+          <div class="hero-visual" aria-hidden="true"><div class="orbit o1"></div><div class="orbit o2"></div><div class="core-node">NV</div><span class="satellite s1">PC</span><span class="satellite s2">SW</span><span class="satellite s3">RTR</span><span class="packet-dot p1"></span><span class="packet-dot p2"></span></div>
+        </div>
+        <div class="metric-row"><article><small>LAB MODULES</small><strong>10</strong><span>One connected learning suite</span></article><article><small>PROTOCOL LAYERS</small><strong>7</strong><span>Events mapped to OSI concepts</span></article><article><small>LIVE RESOLVER</small><strong>A / AAAA / PTR</strong><span>Uses this computer’s DNS</span></article><article><small>SIMULATION MODE</small><strong>SAFE</strong><span>No physical traffic generation</span></article></div>
+        <div class="section-heading"><div><p class="eyebrow">CHOOSE A LAB</p><h3>What will you explore?</h3></div></div>
+        <div class="module-grid">
+          <button data-open-view="topology" class="module-card cyan"><span class="module-no">01</span><div class="mini-topology"><i></i><i></i><i></i><b></b><b></b></div><h3>Topology & Packet Lab</h3><p>Design, configure, route, switch, filter, and follow animated packets.</p></button>
+          <button data-open-view="mobile" class="module-card purple"><span class="module-no">02</span><div class="tower-art"><i></i><i></i><i></i></div><h3>Mobile Call Lab</h3><p>Registration, paging, call setup, coverage, and cellular handover.</p></button>
+          <button data-open-view="transport" class="module-card amber"><span class="module-no">03</span><div class="pulse-art"><i></i><i></i><i></i></div><h3>Protocol Studio</h3><p>Compare TCP handshakes and reliability with rapid UDP datagrams.</p></button>
+          <button data-open-view="dns" class="module-card green"><span class="module-no">04</span><div class="globe-art"><i></i><i></i></div><h3>Addressing Services</h3><p>Use real DNS and animate DHCP DORA with persistent leases.</p></button>
+        </div>
+      </section>
+
+      <section id="topology" class="view topology-view">
+        <div class="lab-toolbar glass">
+          <div class="toolbar-group"><button id="newTopology" class="tool-btn">＋ New</button><button id="saveTopology" class="tool-btn">▣ Save</button><button id="loadTopology" class="tool-btn">↥ Load</button></div>
+          <div class="toolbar-group"><button id="selectMode" class="tool-btn active">↖ Select</button><button id="wireMode" class="tool-btn">╱ Wired</button><button id="wirelessMode" class="tool-btn">⌁ Wireless</button><button id="deleteSelection" class="tool-btn danger">× Delete</button></div>
+          <div class="toolbar-group right"><label class="compact">Zoom <input type="range" id="zoomSlider" min="60" max="140" value="100"></label><button id="fitCanvas" class="tool-btn">Fit</button></div>
+        </div>
+        <div class="topology-layout">
+          <aside class="device-palette glass"><div class="scratch-launch"><span>CUSTOM LAB</span><strong>Build from scratch</strong><p>Start with a clean canvas, then drag or click devices below.</p><button id="blankTopology" class="primary small">＋ Blank topology</button></div><p class="eyebrow">DEVICE LIBRARY</p><div id="devicePalette"></div><hr><p class="eyebrow">5 PREMADE TOPOLOGIES</p><button class="palette-action" data-topology-template="campus">Campus VLAN <span>01</span></button><button class="palette-action" data-topology-template="stp">STP resilient triangle <span>02</span></button><button class="palette-action" data-topology-template="branch">Branch office WAN <span>03</span></button><button class="palette-action" data-topology-template="datacenter">Three-tier data centre <span>04</span></button><button class="palette-action" data-topology-template="wireless">Wireless campus <span>05</span></button><button class="palette-action" id="clearCanvas">Clear canvas <span>×</span></button></aside>
+          <div class="canvas-wrap">
+            <svg id="topologyCanvas" viewBox="0 0 1200 720" role="img" aria-label="Network topology workspace"><defs><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(113,145,169,.14)" stroke-width="1"/></pattern><filter id="nodeGlow"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><rect width="1200" height="720" fill="url(#grid)"/><g id="linksLayer"></g><g id="nodesLayer"></g><g id="packetsLayer"></g></svg>
+            <div class="canvas-hint" id="canvasHint">Drag devices here or click a device in the palette</div>
+            <div class="canvas-stats"><span id="nodeCount">0 devices</span><span id="linkCount">0 links</span></div>
+          </div>
+          <aside class="inspector glass"><div class="inspector-tabs"><button class="active" data-inspector="config">Configure</button><button data-inspector="tables">Tables</button><button data-inspector="events">Events</button></div><div id="inspectorBody" class="inspector-body"></div></aside>
+        </div>
+        <div class="packet-console glass"><div class="console-head"><div><p class="eyebrow">PACKET EXPERIMENT</p><h3>Send and inspect</h3></div><div class="console-controls"><select id="packetSource"></select><span>→</span><select id="packetDestination"></select><select id="packetProtocol"><option>ICMP</option><option>TCP</option><option>UDP</option></select><input id="packetPort" type="number" value="443" min="1" max="65535" title="Destination port"><button id="sendPacket" class="primary small">Send packet</button></div></div><div class="event-strip" id="eventStrip"><div class="empty-state">Build or load a topology, then send a packet to see every forwarding decision.</div></div></div>
+      </section>
+
+      <section id="mobile" class="view">
+        <div class="split-heading"><div><p class="eyebrow">CELLULAR CALL CONTROL · STEP-BY-STEP</p><h1>Mobile Call Control Theatre</h1><p>Watch both phones, radio towers, switching centre, subscriber database, and voice bearer coordinate a call. Use Auto or Next to inspect every stage.</p></div><div class="legend"><span><i class="cyan-dot"></i> Signalling</span><span><i class="green-dot"></i> Voice bearer</span><span><i class="amber-dot"></i> Radio processing</span></div></div>
+        <div class="call-dashboard">
+          <div class="handset-card caller" id="phonePanelA"><div class="phone-bezel"><div class="phone-status"><span>NETVIZ 5G</span><b id="phoneASignal">▮▮▮▮</b></div><div class="phone-screen-state" id="phoneScreenA"><small>ASHA</small><strong>Ready</strong><span>Registered device</span></div><div class="dial-pad" id="dialPad"><i>1</i><i>2</i><i>3</i><i>4</i><i>5</i><i>6</i><i>7</i><i>8</i><i>9</i></div></div><div class="device-caption"><b>Asha · UE-A</b><span id="regA">Not registered</span></div></div>
+          <div class="call-network-map glass" id="mobileStage"><svg id="mobileCanvas" viewBox="0 0 1000 560"><defs><radialGradient id="cellA"><stop offset="0" stop-color="#1fd9ff" stop-opacity=".3"/><stop offset="1" stop-color="#1fd9ff" stop-opacity="0"/></radialGradient><radialGradient id="cellB"><stop offset="0" stop-color="#ff6fd8" stop-opacity=".25"/><stop offset="1" stop-color="#ff6fd8" stop-opacity="0"/></radialGradient></defs><circle cx="220" cy="300" r="250" fill="url(#cellA)"/><circle cx="780" cy="300" r="250" fill="url(#cellB)"/><g id="mobileLinks"></g><g class="tower" id="towerA" transform="translate(190 235)"><path d="M0 150 L40 0 L80 150 M18 90 H62 M10 125 H70"/><path class="signal" d="M20 18 Q40 -2 60 18 M8 2 Q40 -30 72 2"/><text x="40" y="180">gNodeB Alpha</text></g><g class="tower purple-tower" id="towerB" transform="translate(730 235)"><path d="M0 150 L40 0 L80 150 M18 90 H62 M10 125 H70"/><path class="signal" d="M20 18 Q40 -2 60 18 M8 2 Q40 -30 72 2"/><text x="40" y="180">gNodeB Beta</text></g><g id="msc" transform="translate(445 45)"><rect width="110" height="70" rx="14"/><path d="M18 20h74M18 35h74M18 50h48"/><text x="55" y="94">Core / Call Control</text></g><g id="subscriberDb" transform="translate(460 170)"><ellipse cx="40" cy="8" rx="40" ry="8"/><path d="M0 8v48c0 10 80 10 80 0V8M0 32c0 10 80 10 80 0"/><text x="40" y="82">Subscriber DB</text></g><g id="phoneA" class="phone draggable" transform="translate(70 430)" data-phone="A"><rect width="55" height="94" rx="10"/><rect x="7" y="9" width="41" height="60" rx="4"/><circle cx="27.5" cy="81" r="4"/><text x="27" y="116">Asha</text></g><g id="phoneB" class="phone draggable" transform="translate(875 430)" data-phone="B"><rect width="55" height="94" rx="10"/><rect x="7" y="9" width="41" height="60" rx="4"/><circle cx="27.5" cy="81" r="4"/><text x="27" y="116">Ravi</text></g><g id="mobileSignalLayer"></g></svg><div class="network-process-banner" id="networkProcess"><b>Network idle</b><span>Register devices to begin</span></div></div>
+          <div class="handset-card receiver" id="phonePanelB"><div class="phone-bezel"><div class="phone-status"><span>NETVIZ 5G</span><b id="phoneBSignal">▮▮▮▮</b></div><div class="phone-screen-state" id="phoneScreenB"><small>RAVI</small><strong>Ready</strong><span>Registered device</span></div><div class="incoming-wave"><i></i><i></i><i></i></div></div><div class="device-caption"><b>Ravi · UE-B</b><span id="regB">Not registered</span></div></div>
+        </div>
+        <div class="call-control-grid"><div class="control-card glass"><p class="eyebrow">CALL SCENARIO</p><label>Direction<select id="callDirection"><option value="A-B">Asha → Ravi</option><option value="B-A">Ravi → Asha</option></select></label><div class="button-pair"><button id="registerMobiles" class="primary">Register both</button><button id="startCall" class="success">Dial call</button></div><div class="step-controls"><button id="callAuto" class="primary small">▶ Auto</button><button id="callNext" class="ghost small">Next stage →</button><button id="answerCall" class="success small">Answer</button><button id="endCall" class="danger-btn small">Release</button></div><div class="signal-meters"><label>Asha signal <meter id="signalA" min="0" max="100" value="80"></meter></label><label>Ravi signal <meter id="signalB" min="0" max="100" value="80"></meter></label></div></div><div class="glass call-stage-tracker"><p class="eyebrow">LIVE CALL STATE MACHINE</p><div id="callStageRail" class="stage-rail"></div><div id="callTimeline" class="vertical-timeline"><p class="empty-state">Registration and call events appear here.</p></div></div></div>
+      </section>
+
+      <section id="messaging" class="view">
+        <div class="split-heading"><div><p class="eyebrow">ENCAPSULATION · FRAGMENTATION · DELIVERY</p><h1>Message Packet Microscope</h1><p>Build a message, choose TCP or UDP, control the MTU, then inspect the exact data unit created at every layer. Auto plays the lesson; Next reveals one transformation at a time.</p></div><div class="lesson-controls"><button id="messageAuto" class="primary">▶ Auto</button><button id="messageNext" class="ghost">Next layer →</button><button id="messageReset" class="ghost">Reset</button></div></div>
+        <div class="message-config glass"><label class="grow">Application message<input id="messagePayload" value="Hello from NetViz — show me every layer!" maxlength="1200"></label><label>Transport<select id="messageTransport"><option>TCP</option><option>UDP</option></select></label><label>Path MTU<select id="messageMtu"><option value="1500">1500 bytes</option><option value="576">576 bytes</option><option value="200">200 bytes · force fragments</option><option value="96">96 bytes · many fragments</option></select></label><button id="sendMessage" class="primary">Prepare journey</button></div>
+        <div class="packet-microscope">
+          <div class="chat-device glass"><div class="phone-header"><span>AS</span><div><strong>Asha</strong><small>192.168.10.12 · AA:10:00:00:00:12</small></div></div><div class="chat-screen" id="senderChat"><div class="chat-placeholder">Compose a message above</div></div></div>
+          <div class="journey-stage glass"><div class="journey-nodes"><div class="journey-node sender"><i></i><span>Sender</span></div><div class="journey-node wifi"><i></i><span>Wi-Fi AP</span></div><div class="journey-node cloud"><i></i><span>Routers</span></div><div class="journey-node receiver"><i></i><span>Receiver</span></div></div><svg id="messageJourney" viewBox="0 0 760 160"><path id="messagePath" d="M60 80 C170 20 230 140 350 80 S550 25 700 80"/><g id="messagePacket"></g></svg><div class="pdu-stage" id="pduStage"><div class="pdu-empty">Press “Prepare journey” to create application data.</div></div><div id="fragmentTray" class="fragment-tray"></div><div id="encapsulationStack" class="layer-stack"><div data-layer="Application">Application <span>DATA</span></div><div data-layer="Transport">Transport <span>SEGMENT / DATAGRAM</span></div><div data-layer="Network">Network <span>PACKET / FRAGMENTS</span></div><div data-layer="Data Link">Data Link <span>FRAME</span></div><div data-layer="Physical">Physical <span>BITS / SIGNALS</span></div></div><div id="messageExplanation" class="explanation-box">Prepare a message, then use Auto or Next.</div></div>
+          <div class="chat-device receiver-device glass"><div class="phone-header"><span>RV</span><div><strong>Ravi</strong><small>10.20.30.44 · BB:20:00:00:00:44</small></div></div><div id="receiverDecap" class="receiver-decap"><p>Receiver decapsulation</p><div data-rx-layer="frame"><b>FRAME</b><span>Waiting</span></div><div data-rx-layer="packet"><b>PACKET</b><span>Waiting</span></div><div data-rx-layer="transport"><b>SEGMENT</b><span>Waiting</span></div><div data-rx-layer="data"><b>DATA</b><span>Waiting</span></div></div><div class="chat-screen" id="receiverChat"><div class="chat-placeholder">Waiting for frame arrival…</div></div><div class="delivery-status"><i></i> Destination application</div></div>
+        </div>
+      </section>
+
+      <section id="transport" class="view">
+        <div class="split-heading"><div><p class="eyebrow">STATE · RELIABILITY · LOSS RECOVERY</p><h1>TCP & UDP Motion Lab</h1><p>Animate connection setup, byte sequencing, acknowledgments, windows, loss, retransmission, and UDP datagrams on a live timeline.</p></div><div class="lesson-controls"><button id="transportAuto" class="primary">▶ Auto</button><button id="transportNext" class="ghost">Next PDU →</button><button id="transportReset" class="ghost">Reset</button></div></div>
+        <div class="protocol-config glass"><label>Protocol<select id="transportProtocol"><option value="TCP">TCP</option><option value="UDP">UDP</option></select></label><label>Application<select id="servicePort"><option value="80">HTTP · 80</option><option value="443" selected>HTTPS · 443</option><option value="53">DNS · 53</option><option value="22">SSH · 22</option><option value="25">SMTP · 25</option><option value="custom">Custom</option></select></label><label>Port<input id="transportPort" type="number" value="443" min="1" max="65535"></label><label class="grow">Payload<input id="transportPayload" value="GET /lesson HTTP/1.1" maxlength="500"></label><label class="toggle-label"><input id="simulateLoss" type="checkbox"> Drop one PDU</label><button id="runTransport" class="primary">Build sequence</button></div>
+        <div class="transport-layout"><div class="sequence-diagram glass"><div class="endpoint client-end"><span>CLIENT</span><strong>10.0.0.10:49152</strong><em id="clientTcpState">CLOSED</em></div><div class="endpoint right server-end"><span>SERVER</span><strong>10.0.0.80:443</strong><em id="serverTcpState">LISTEN</em></div><div class="lifeline left-line"></div><div class="lifeline right-line"></div><div id="sequenceEvents"></div><div id="transportPacketFlyer" class="transport-flyer"></div></div><aside class="glass protocol-insight"><p class="eyebrow">LIVE PROTOCOL ANALYZER</p><div id="protocolMetrics" class="protocol-metrics"><div><span>State</span><strong>Idle</strong></div><div><span>Header</span><strong>—</strong></div><div><span>Reliability</span><strong>—</strong></div></div><div class="window-meter"><span>TCP receive window</span><div><i id="windowFill"></i></div></div><div id="transportHeader" class="header-inspector"><span>Select a PDU to inspect fields.</span></div><div id="transportExplanation" class="explanation-box">Build a TCP or UDP sequence, then step through it.</div><div class="comparison-table"><div><b>TCP</b><span>Connection state, ordered bytes, ACKs, flow and congestion control.</span></div><div><b>UDP</b><span>Message boundaries, 8-byte header, no transport recovery.</span></div></div></aside></div>
+      </section>
+
+      <section id="subnet" class="view narrow-view">
+        <div class="split-heading"><div><p class="eyebrow">BINARY BOUNDARIES · ADDRESS SPACE</p><h1>Animated IPv4 & Subnet Studio</h1><p>See an address turn into bits, apply the mask, separate network and host portions, then map usable hosts and reserved endpoints.</p></div><div class="lesson-controls"><button id="subnetAuto" class="primary">▶ Animate</button><button id="subnetNext" class="ghost">Next concept →</button></div></div>
+        <div class="calculator glass"><div class="calculator-input"><label>IPv4 interface / CIDR<input id="subnetInput" value="192.168.10.42/24" placeholder="192.168.1.10/24"></label><button id="calculateSubnet" class="primary">Calculate</button></div><div class="subnet-stage-rail" id="subnetStageRail"></div><div class="binary-equation"><div><span>IP ADDRESS</span><code id="binaryIp">—</code></div><b>AND</b><div><span>SUBNET MASK</span><code id="binaryMask">—</code></div><b>=</b><div><span>NETWORK</span><code id="binaryNetwork">—</code></div></div><div id="subnetVisual" class="bit-visual"></div><div id="addressSpaceBar" class="address-space-bar"></div><div id="subnetExplanation" class="explanation-box">Enter a CIDR interface and calculate.</div><div id="subnetResults" class="result-grid"><div class="empty-state">Enter an address with a CIDR prefix to begin.</div></div></div>
+      </section>
+
+      <section id="dhcp" class="view narrow-view">
+        <div class="split-heading"><div><p class="eyebrow">POOL DISCOVERY · DORA · LEASE LIFECYCLE</p><h1>DHCP Address Allocation Lab</h1><p>Scan the pool, identify unavailable and free addresses, animate DORA, then follow T1 renewal, T2 rebinding, expiry, and release.</p></div><div class="lesson-controls"><button id="dhcpAuto" class="primary">▶ Auto</button><button id="dhcpNext" class="ghost">Next stage →</button><button id="dhcpRelease" class="danger-btn">Release selected</button></div></div>
+        <div class="dhcp-controls glass"><label>Client ID<input id="dhcpClient" value="student-laptop"></label><label>DHCP network<input id="dhcpNetwork" value="192.168.50.0/24"></label><label>Lease duration<select id="leaseDuration"><option value="120">2 minutes · demo</option><option value="3600">1 hour</option><option value="28800">8 hours</option><option value="86400">1 day</option></select></label><button id="runDhcp" class="primary">Discover addresses</button></div>
+        <div class="pool-card glass"><div class="section-heading"><div><p class="eyebrow">ADDRESS POOL</p><h3 id="poolTitle">Available address discovery</h3></div><span id="poolLegend">Reserved · leased · free · selected</span></div><div id="addressPool" class="address-pool"></div></div>
+        <div class="dhcp-stage glass"><div class="dhcp-endpoint client-art"><i></i><strong>DHCP Client</strong><span id="clientLeaseIp">0.0.0.0</span></div><div id="doraLane" class="dora-lane"></div><div class="dhcp-endpoint server-art"><i></i><strong>DHCP Server</strong><span>UDP 67</span></div></div>
+        <div class="lease-lifecycle glass"><div class="lease-clock"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="48"/><circle id="leaseClockProgress" cx="60" cy="60" r="48"/><text id="leaseClockText" x="60" y="64">—</text></svg><span>Lease countdown</span></div><div class="lease-phases" id="leasePhases"><div><b>BOUND</b><span>Address usable</span></div><div><b>T1 · 50%</b><span>Unicast renew</span></div><div><b>T2 · 87.5%</b><span>Broadcast rebind</span></div><div><b>EXPIRY</b><span>Address removed</span></div></div><div id="leaseBehavior" class="explanation-box">Complete DORA to activate the lease timer.</div></div>
+        <div class="glass lease-card"><div class="section-heading"><div><p class="eyebrow">PERSISTENT LEASE TABLE</p><h3>Assigned clients</h3></div><button id="refreshLeases" class="ghost small">Refresh</button></div><div id="leaseTable" class="data-table"></div></div>
+      </section>
+
+      <section id="dns" class="view narrow-view">
+        <div class="split-heading"><div><p class="eyebrow">VALIDATE · CACHE · RESOLVE · ANSWER</p><h1>DNS Resolution Theatre</h1><p>Validate a hostname or URL, extract its host, then animate stub-resolver, cache, recursive, root, TLD, authoritative, and answer stages before using the computer's real configured resolver.</p></div><span class="live-pill">REAL SYSTEM RESOLVER</span></div>
+        <div class="dns-query glass"><label class="grow">Hostname, URL, or IP for PTR<input id="dnsQuery" value="https://example.com/learn/networking" placeholder="https://www.example.com/path or 8.8.8.8"></label><label>Record<select id="dnsType"><option>A</option><option>AAAA</option><option>PTR</option></select></label><button id="runDns" class="primary">Validate & resolve</button></div><div id="dnsValidation" class="validation-banner"><b>Input validation ready</b><span>A URL will be normalized to its hostname before lookup.</span></div>
+        <div class="dns-flow glass"><div class="dns-hop" data-dns-stage="input"><span>1</span><strong>Browser / App</strong><small>Parse and validate</small></div><i>→</i><div class="dns-hop" data-dns-stage="stub"><span>2</span><strong>Stub resolver</strong><small>Hosts + local cache</small></div><i>→</i><div class="dns-hop" data-dns-stage="recursive"><span>3</span><strong>Recursive</strong><small>System-configured DNS</small></div><i>→</i><div class="dns-hop" data-dns-stage="root"><span>4</span><strong>Root</strong><small>Referral concept</small></div><i>→</i><div class="dns-hop" data-dns-stage="tld"><span>5</span><strong>TLD</strong><small>.com / zone referral</small></div><i>→</i><div class="dns-hop" data-dns-stage="auth"><span>6</span><strong>Authoritative</strong><small>Resource record</small></div><i>→</i><div class="dns-hop" data-dns-stage="answer"><span>7</span><strong>Answer</strong><small>A / AAAA / PTR</small></div><svg class="dns-pulse-path" viewBox="0 0 1000 40"><path id="dnsPulsePath" d="M15 20 H985"/><circle id="dnsPulse" r="7" cx="15" cy="20"/></svg></div><div id="dnsTranscript" class="dns-transcript glass"></div><div id="dnsResults" class="glass dns-results"><div class="empty-state">Resolve a validated input to view real resolver answers.</div></div>
+      </section>
+
+      <section id="media" class="view">
+        <div class="split-heading"><div><p class="eyebrow">FIVE MEDIA STUDIOS · SIGNAL PHYSICS</p><h1>Transmission Media Discovery Lab</h1><p>Open any studio to inspect construction, animate the signal, compare practical limits, and connect the medium to real deployments.</p></div></div><div id="mediaSections" class="media-section-grid"><button data-media-section="twisted"><span>01</span><div class="media-card-art copper-art"><i></i><i></i><i></i><i></i></div><h3>Twisted-Pair Copper</h3><p>CAT5, CAT5e, CAT6, CAT6a, shielding and differential signalling.</p></button><button data-media-section="coax"><span>02</span><div class="media-card-art coax-art"><i></i></div><h3>Coaxial Cable</h3><p>Centre conductor, dielectric, shield, impedance and RF propagation.</p></button><button data-media-section="fibre"><span>03</span><div class="media-card-art fibre-art"><i></i><i></i><i></i></div><h3>Optical Fibre</h3><p>Core, cladding, light pulses, single-mode and multimode operation.</p></button><button data-media-section="radio"><span>04</span><div class="media-card-art radio-art"><i></i><i></i><i></i></div><h3>Radio Wireless</h3><p>Wi-Fi, Bluetooth and cellular spectrum, coverage and interference.</p></button><button data-media-section="infrared"><span>05</span><div class="media-card-art infrared-art"><i></i></div><h3>Infrared</h3><p>Directional light, line of sight, emitters, receivers and use cases.</p></button></div><div class="media-studio glass"><div id="mediaAnimation" class="media-animation"></div><aside id="mediaDetails" class="media-details"></aside></div><div class="media-attribution glass"><b>Reference sources</b><p id="mediaCredit">Open a studio to view its linked hardware references and the always-available NetViz interactive diagram.</p></div>
+      </section>
+
+      <section id="quiz" class="view">
+        <div class="split-heading"><div><p class="eyebrow">TOPIC CARDS · LEVELS INSIDE EACH MODULE</p><h1>Network Academy Quiz Centre</h1><p>Each topic card contains Beginner, Intermediate, and Advanced entry points. Choose the number of questions, then launch directly from the topic you want to practise.</p></div><div class="quiz-session-config"><label>Questions per set<select id="quizLength"><option>5</option><option selected>10</option><option>15</option><option>20</option></select></label></div></div><input id="quizDifficulty" type="hidden" value="beginner"><button id="newQuizSet" hidden></button><div id="quizModules" class="quiz-module-grid"></div><div id="quizSessionHeader" class="quiz-session-header glass"><span>Select a level inside a topic card</span><b>Questions do not repeat until that topic/level cycle is exhausted.</b></div><form id="quizForm" class="quiz-form"></form><div id="quizResult"></div>
+      </section>
+
+      <section id="missions" class="view">
+        <div class="split-heading"><div><p class="eyebrow">GUIDED PRACTICE · REAL ENGINEERING DECISIONS</p><h1>Network Challenge Lab</h1><p>Launch scenario-based missions, complete configuration objectives, and use evidence from packet events, tables, protocol states, and calculations to solve each challenge.</p></div><span class="mission-badge">6 guided missions</span></div><div id="missionGrid" class="mission-grid"></div><div id="missionWorkspace" class="mission-workspace glass"><div><p class="eyebrow">SELECT A MISSION</p><h2>Turn knowledge into engineering skill</h2><p>Every mission launches the correct NetViz lab and provides measurable objectives rather than passive progress charts.</p></div></div>
+      </section>
+
+    </main>
+  </div>
+
+  <dialog id="genericDialog"><div class="dialog-head"><h3 id="dialogTitle">Dialog</h3><button data-close-dialog>×</button></div><div id="dialogBody"></div></dialog>
+  <script src="{{ url_for('static', path='js/app.js') }}" defer></script>
+  <script src="{{ url_for('static', path='js/upgrade.js') }}" defer></script>
+  <script src="{{ url_for('static', path='js/v3.js') }}" defer></script>
+</body>
+</html>
