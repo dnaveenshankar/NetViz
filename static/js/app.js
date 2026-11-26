@@ -419,7 +419,7 @@ async function initDeploymentStatus(){
     if(info.serverless){
       const badge=$(".simulation-badge");
       badge.classList.add("serverless-badge");
-      badge.innerHTML="<i></i> Vercel demo · ephemeral saves";
+      badge.innerHTML="<i></i>";
       badge.title=info.message;
     }
   }catch(_){/* The lab remains usable if deployment metadata is unavailable. */}
